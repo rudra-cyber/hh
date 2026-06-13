@@ -1,0 +1,47 @@
+{
+  "entities": {
+    "trades": {
+      "title": "Trade Journal Entry",
+      "description": "Represents a single recorded trade in the user's trading journal.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique trade identifier" },
+        "userId": { "type": "string", "description": "The UID of the user who logged this trade" },
+        "pair": { "type": "string", "description": "The financial instrument or trading pair (e.g. BTCUSD, EURUSD)" },
+        "strategy": { "type": "string", "description": "The name or ID of the trading strategy used" },
+        "entryReason": { "type": "string", "description": "Markdown or text listing what indicators or analysis triggered the entry" },
+        "direction": { "type": "string", "enum": ["LONG", "SHORT"], "description": "The direction of the trade (Long or Short)" },
+        "time": { "type": "string", "description": "ISO timestamp for the trade execution time" },
+        "profit": { "type": "number", "description": "Net profit or loss amount. Positive for profit, negative for loss." },
+        "riskReward": { "type": "number", "description": "Planned Risk-Reward (RR) ratio" },
+        "mistake": { "type": "string", "description": "Any mistakes made during execution (e.g. FOMO, early exit, skipped stop loss)" },
+        "images": { "type": "array", "description": "List of base64 values or public URLs for multiple screenshot images" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when this record was created on server" }
+      },
+      "required": ["id", "userId", "pair", "strategy", "direction", "time", "profit"]
+    },
+    "strategies": {
+      "title": "Trading Strategy",
+      "description": "A trading strategy predefined or created by the user to organize journal entries.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique strategy identifier" },
+        "userId": { "type": "string", "description": "The UID of the user who owns this strategy" },
+        "name": { "type": "string", "description": "The name of the strategy (e.g. Order Block, Support & Resistance Breakout)" },
+        "description": { "type": "string", "description": "The description or rules of the strategy" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when this record was created" }
+      },
+      "required": ["id", "userId", "name"]
+    }
+  },
+  "firestore": {
+    "trades/{tradeId}": {
+      "schema": "trades",
+      "description": "User logged trades collection mapped by tradeId."
+    },
+    "strategies/{strategyId}": {
+      "schema": "strategies",
+      "description": "User defined strategies collection mapped by strategyId."
+    }
+  }
+}
