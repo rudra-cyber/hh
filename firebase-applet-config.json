@@ -1,10 +1,9 @@
 {
-  "projectId": "booming-node-skpr3",
-  "appId": "1:452479331557:web:c3c3bd5a4e0ad9f9b4f80c",
-  "apiKey": "AIzaSyDk-y0RhnSP98UE3Xfx4jfR0K2uZA4FTvg",
-  "authDomain": "booming-node-skpr3.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-410f799a-6c19-4a3f-afad-8d76f885918f",
-  "storageBucket": "booming-node-skpr3.firebasestorage.app",
-  "messagingSenderId": "452479331557",
-  "measurementId": ""
+  "projectId": "my-trading-journal-de611",
+  "appId": "1:971331184472:web:66e8e783572188c8e2672d",
+  "apiKey": "AIzaSyAT6JctDo5fWdU83UEfvCIxvDbDQcDbRFw",
+  "authDomain": "my-trading-journal-de611.firebaseapp.com",
+  "storageBucket": "my-trading-journal-de611.firebasestorage.app",
+  "messagingSenderId": "971331184472",
+  "measurementId": "G-HCEGRQ9L05"
 }
