@@ -29,7 +29,7 @@ service cloud.firestore {
     // Validation helper for Trade
     function isValidTrade(data) {
       return data.keys().hasAll(['id', 'userId', 'pair', 'strategy', 'direction', 'time', 'profit'])
-        && data.keys().size() <= 12
+        && data.keys().size() <= 30
         && data.id is string && data.id.size() <= 128
         && data.userId is string && data.userId.size() <= 128
         && data.pair is string && data.pair.size() <= 32
@@ -41,7 +41,19 @@ service cloud.firestore {
         && (!data.keys().hasAny(['mistake']) || (data.mistake is string && data.mistake.size() <= 256))
         && (!data.keys().hasAny(['entryReason']) || (data.entryReason is string && data.entryReason.size() <= 4096))
         && (!data.keys().hasAny(['images']) || (data.images is list && data.images.size() <= 20))
-        && (!data.keys().hasAny(['createdAt']) || (data.createdAt is string && data.createdAt.size() <= 64));
+        && (!data.keys().hasAny(['createdAt']) || (data.createdAt is string && data.createdAt.size() <= 64))
+        && (!data.keys().hasAny(['date']) || (data.date is string && data.date.size() <= 64))
+        && (!data.keys().hasAny(['dailyChart']) || (data.dailyChart is string && data.dailyChart.size() <= 3000000))
+        && (!data.keys().hasAny(['fourHourChart']) || (data.fourHourChart is string && data.fourHourChart.size() <= 3000000))
+        && (!data.keys().hasAny(['oneHourChart']) || (data.oneHourChart is string && data.oneHourChart.size() <= 3000000))
+        && (!data.keys().hasAny(['fifteenMinChart']) || (data.fifteenMinChart is string && data.fifteenMinChart.size() <= 3000000))
+        && (!data.keys().hasAny(['bigTimeFrameScenario']) || (data.bigTimeFrameScenario is string && data.bigTimeFrameScenario.size() <= 16384))
+        && (!data.keys().hasAny(['entryRules']) || (data.entryRules is list && data.entryRules.size() <= 50))
+        && (!data.keys().hasAny(['lotSize']) || (data.lotSize is int || data.lotSize is float || data.lotSize is number))
+        && (!data.keys().hasAny(['leverage']) || (data.leverage is int || data.leverage is float || data.leverage is number))
+        && (!data.keys().hasAny(['riskPercent']) || (data.riskPercent is int || data.riskPercent is float || data.riskPercent is number))
+        && (!data.keys().hasAny(['stopLossPips']) || (data.stopLossPips is int || data.stopLossPips is float || data.stopLossPips is number))
+        && (!data.keys().hasAny(['accountBalance']) || (data.accountBalance is int || data.accountBalance is float || data.accountBalance is number));
     }
 
     // Rules for Strategies
