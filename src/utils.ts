@@ -3,8 +3,8 @@ import { Trade, PerformanceStats, Strategy } from "./types";
 export const DEFAULT_STRATEGIES: Strategy[] = [
   {
     id: "s1",
-    name: "Order Block & Liquidity Sweep (ICT)",
-    description: "Trading off institutional order blocks after a liquidity sweep of session highs/lows.",
+    name: "1k Delta Strategy",
+    description: "Candle with delta 1k and then make opposite candle,then high or low break or retailer sl hit,then opposite candle and entry.",
     createdAt: new Date().toISOString()
   },
   {
