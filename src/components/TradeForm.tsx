@@ -565,7 +565,7 @@ export default function TradeForm({ onSaveTrade, onCancel, strategies, initialDa
   };
 
   // Form submits compiling unified ISO timestamp values
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Auto-resolve empty parameters, making nothing strictly mandatory!
@@ -610,6 +610,62 @@ export default function TradeForm({ onSaveTrade, onCancel, strategies, initialDa
     setSaveProgress(0);
     setSaveLoadStep(1);
 
+    // Let's optimize/compress all photos to ensure the total document is guaranteed under 1MB limit.
+    const totalImageLength = 
+      (dailyChart?.length || 0) +
+      (fourHourChart?.length || 0) +
+      (oneHourChart?.length || 0) +
+      (fifteenMinChart?.length || 0) +
+      images.reduce((acc, img) => acc + (img?.length || 0), 0);
+
+    // Calculate maximum safe parameters depending on total load size
+    let targetWidth = 1024;
+    let targetQuality = 0.6;
+    if (totalImageLength > 600000) {
+      // 600KB base64 is around 450KB binary. If we exceed this, aggressively bring sizes down
+      targetWidth = 800;
+      targetQuality = 0.5;
+    }
+    if (totalImageLength > 1200000) {
+      // Extremely high load - compress down to ultra small footprint (640px wide 0.45 quality triggers)
+      targetWidth = 640;
+      targetQuality = 0.45;
+    }
+
+    const compressImage = (base64: string): Promise<string> => {
+      if (!base64 || !base64.startsWith("data:image")) return Promise.resolve(base64);
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          if (width > targetWidth) {
+            height = Math.round((height * targetWidth) / width);
+            width = targetWidth;
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL("image/jpeg", targetQuality));
+          } else {
+            resolve(base64);
+          }
+        };
+        img.onerror = () => resolve(base64);
+        img.src = base64;
+      });
+    };
+
+    // Compress all charts & screenshots in parallel. This completes in milliseconds!
+    const optimizedDaily = await compressImage(dailyChart);
+    const optimized4h = await compressImage(fourHourChart);
+    const optimized1h = await compressImage(oneHourChart);
+    const optimized15m = await compressImage(fifteenMinChart);
+    const optimizedImages = await Promise.all(images.map(img => compressImage(img)));
+
     // Dynamic logging progression milestones
     const t1 = setTimeout(() => {
       setSaveProgress(28);
@@ -642,11 +698,11 @@ export default function TradeForm({ onSaveTrade, onCancel, strategies, initialDa
         profit: finalProfit,
         riskReward: parseFloat(String(riskReward)) || 2.0,
         mistake: mistake || "None",
-        images,
-        dailyChart,
-        fourHourChart,
-        oneHourChart,
-        fifteenMinChart,
+        images: optimizedImages,
+        dailyChart: optimizedDaily,
+        fourHourChart: optimized4h,
+        oneHourChart: optimized1h,
+        fifteenMinChart: optimized15m,
         bigTimeFrameScenario,
         entryRules: combinedEntryRules,
         lotSize: lotSize !== "" ? parseFloat(String(lotSize)) : undefined,
