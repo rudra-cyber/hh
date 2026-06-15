@@ -1322,75 +1322,116 @@ export default function App() {
       </footer>
 
       {/* Render Add/Edit Modal */}
-      {showTradeForm && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 flex items-center justify-center p-4">
-          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl">
-            <TradeForm 
-              onSaveTrade={handleSaveTrade} 
-              onCancel={() => {
-                setShowTradeForm(false);
-                setEditTradeData(null);
-              }} 
-              strategies={strategies}
-              initialData={editTradeData}
-            />
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {showTradeForm && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 30 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl"
+            >
+              <TradeForm 
+                onSaveTrade={handleSaveTrade} 
+                onCancel={() => {
+                  setShowTradeForm(false);
+                  setEditTradeData(null);
+                }} 
+                strategies={strategies}
+                initialData={editTradeData}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* 💥 database Purge / Reset confirmation popup */}
-      {showResetConfirm && (
-        <div className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4">
-          <div className="bg-[#161B22] border border-red-500/40 rounded-2xl max-w-md w-full p-6 text-center space-y-4">
-            <div className="inline-block p-3 bg-red-600/10 rounded-full text-red-500">
-              <AlertTriangle className="h-10 w-10 animate-bounce" />
-            </div>
-            
-            <h3 className="text-lg font-bold text-white">Prism Database Purge Alert</h3>
-            <p className="text-xs text-slate-400">
-              This action will completely delete all recorded trade history, metrics, and custom strategy settings, resetting all statistics back to zero. This is a terminal action.
-            </p>
-
-            <div className="space-y-2 text-left">
-              <label className="block text-[10px] text-slate-500 tracking-wider font-semibold uppercase">Type "RESET" to confirm deletion</label>
-              <input
-                type="text"
-                placeholder="Type RESET"
-                value={resetDoubleTyped}
-                onChange={(e) => setResetDoubleTyped(e.target.value)}
-                className="w-full text-xs font-mono bg-[#0A0E14] border border-red-500/30 rounded-xl p-3 text-red-400 focus:outline-none"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 pt-3">
-              <button
-                onClick={() => setShowResetConfirm(false)}
-                className="w-full text-xs bg-[#1C2128] text-slate-400 hover:text-white py-2.5 rounded-xl font-semibold transition cursor-pointer"
-              >
-                Nevermind, Cancel
-              </button>
+      <AnimatePresence>
+        {showResetConfirm && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-lg flex items-center justify-center p-4"
+          >
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 40 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 40 }}
+              transition={{ type: "spring", stiffness: 300, damping: 26 }}
+              className="bg-[#161B22] border border-red-500/40 rounded-2xl max-w-md w-full p-6 text-center space-y-4 shadow-red-500/5 shadow-2xl"
+            >
+              <div className="inline-block p-3 bg-red-600/10 rounded-full text-red-500">
+                <AlertTriangle className="h-10 w-10 animate-bounce" />
+              </div>
               
-              <button
-                onClick={handleResetAllData}
-                disabled={resetDoubleTyped !== "RESET"}
-                className="w-full text-xs bg-red-600 hover:bg-red-700 disabled:bg-[#1C2128] disabled:text-slate-600 disabled:cursor-not-allowed text-white py-2.5 rounded-xl font-bold transition cursor-pointer"
-              >
-                Yes, Purge Database
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+              <h3 className="text-lg font-bold text-white">Prism Database Purge Alert</h3>
+              <p className="text-xs text-slate-400">
+                This action will completely delete all recorded trade history, metrics, and custom strategy settings, resetting all statistics back to zero. This is a terminal action.
+              </p>
+
+              <div className="space-y-2 text-left">
+                <label className="block text-[10px] text-slate-500 tracking-wider font-semibold uppercase">Type "RESET" to confirm deletion</label>
+                <input
+                  type="text"
+                  placeholder="Type RESET"
+                  value={resetDoubleTyped}
+                  onChange={(e) => setResetDoubleTyped(e.target.value)}
+                  className="w-full text-xs font-mono bg-[#0A0E14] border border-red-500/30 rounded-xl p-3 text-red-400 focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowResetConfirm(false)}
+                  className="w-full text-xs bg-[#1C2128] text-slate-400 hover:text-white py-2.5 rounded-xl font-semibold transition cursor-pointer"
+                >
+                  Nevermind, Cancel
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={handleResetAllData}
+                  disabled={resetDoubleTyped !== "RESET"}
+                  className="w-full text-xs bg-red-600 hover:bg-red-700 disabled:bg-[#1C2128] disabled:text-slate-600 disabled:cursor-not-allowed text-white py-2.5 rounded-xl font-bold transition cursor-pointer"
+                >
+                  Yes, Purge Database
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Photo Enlarge zoom view modal */}
-      {zoomedImage && (
-        <div 
-          onClick={() => setZoomedImage(null)}
-          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center cursor-zoom-out p-4"
-        >
-          <img src={zoomedImage} alt="Zoomed chart snapshot" className="max-w-full max-h-[90vh] rounded-xl shadow-2xl object-contain" />
-        </div>
-      )}
+      <AnimatePresence>
+        {zoomedImage && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setZoomedImage(null)}
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center cursor-zoom-out p-4"
+          >
+            <motion.img 
+              initial={{ opacity: 0, scale: 0.93 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.93 }}
+              transition={{ type: "spring", stiffness: 280, damping: 25 }}
+              src={zoomedImage} 
+              alt="Zoomed chart snapshot" 
+              className="max-w-full max-h-[90vh] rounded-xl shadow-2xl object-contain" 
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* 🚀 Satisfying Animated Confirmation Notification Banner */}
       <AnimatePresence>
