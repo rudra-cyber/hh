@@ -1,26 +1,50 @@
 @import "tailwindcss";
 
-@keyframes wave-motion {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+:root {
+  --neon-blue: #00f2ff;
+  --neon-purple: #bc13fe;
 }
 
+body {
+  margin: 0;
+  background: #020408;
+  perspective: 2000px; /* গ্লোবাল ৩ডি ডেপথ */
+  overflow-x: hidden;
+}
+
+/* ৩ডি মেস ব্যাকগ্রাউন্ড উইথ ওয়েভ মোশন */
 .ambient-glowing-bg {
-  background: linear-gradient(-45deg, #05070b, #0A0D14, #121620, #09101d);
-  background-size: 300% 300%;
-  animation: wave-motion 18s ease infinite;
+  background: radial-gradient(circle at 50% 50%, #0d1d2b 0%, #020408 100%);
+  position: relative;
 }
 
-.aurora-blur-sphere {
-  filter: blur(100px);
-  opacity: 0.15;
-  mix-blend-mode: screen;
-  pointer-events: none;
+.ambient-glowing-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(var(--neon-blue) 1px, transparent 1px),
+    linear-gradient(90deg, var(--neon-blue) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: center;
+  mask-image: radial-gradient(ellipse at 50% 50%, black 20%, transparent 80%);
+  opacity: 0.1;
+  transform: rotateX(60deg) translateZ(-200px);
+  animation: grid-wave 20s linear infinite;
+}
+
+@keyframes grid-wave {
+  from { background-position: 0 0; }
+  to { background-position: 0 500px; }
+}
+
+/* ৩ডি গ্লাস কার্ড স্টাইল */
+.extreme-3d-card {
+  transform-style: preserve-3d;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* বাউন্স ইফেক্ট */
+@keyframes extreme-bounce {
+  0%, 100% { transform: translateY(0) rotateX(0); }
+  50% { transform: translateY(-20px) rotateX(10deg); }
 }
