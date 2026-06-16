@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@keyframes wave-motion {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.ambient-glowing-bg {
+  background: linear-gradient(-45deg, #05070b, #0A0D14, #121620, #09101d);
+  background-size: 300% 300%;
+  animation: wave-motion 18s ease infinite;
+}
+
+.aurora-blur-sphere {
+  filter: blur(100px);
+  opacity: 0.15;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
