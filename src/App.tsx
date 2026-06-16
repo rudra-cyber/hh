@@ -607,7 +607,7 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen ${activeTheme !== 'light' ? 'ambient-glowing-bg' : styles.bg} flex flex-col font-sans selection:bg-blue-650/30 transition-colors duration-200 relative overflow-hidden`}>
+    <div className={`min-h-screen glowing-bg-${activeTheme} flex flex-col font-sans selection:bg-blue-650/30 transition-colors duration-200 relative overflow-hidden`}>
       
       {/* 🌊 Cursor-Reactive Parallax Wave & Science-Fiction Grid Background */}
       <ParallaxWaveBackground activeTheme={activeTheme} />
@@ -1184,10 +1184,23 @@ export default function App() {
              {/* Trading Tickets list display */}
             <div className="grid grid-cols-1 gap-4">
               <AnimatePresence mode="popLayout">
-                {filteredTrades.map((t) => {
+                {filteredTrades.map((t, index) => {
                   const isExpanded = expandedTradeIds.includes(t.id);
                   return (
-                    <div key={t.id} style={{ perspective: 1200 }} className="w-full">
+                    <motion.div
+                      key={t.id}
+                      initial={{ opacity: 0, x: 200 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: false, margin: "-20px" }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 120,
+                        damping: 17,
+                        delay: Math.min((index % 6) * 0.08, 0.45)
+                      }}
+                      style={{ perspective: 1200, transformStyle: "preserve-3d" }}
+                      className="w-full"
+                    >
                       <motion.div 
                          layout
                          animate={{ 
@@ -1539,7 +1552,7 @@ export default function App() {
                           </div>
                         </div>
                       </motion.div>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </AnimatePresence>
