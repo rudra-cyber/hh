@@ -125,12 +125,15 @@ export default function TradeForm({ onSaveTrade, onCancel, strategies, initialDa
   const defaultRules = [
     "Fair Value Gap (FVG)",
     "Structure Shift (MSS/MSB)",
-    "Change of Character (ChoCh)",
+    "DOM CHART",
     "Liquidity Sweep / Grab",
-    "Discount Zone Alignment",
+    "FOOTPRINT CHART",
     "HTF Key Level S/R",
-    "Killzone Session Timing",
-    "EMA/SMA Trend Alignment",
+     "1K DELTA",
+     "HEAVY DELTA FLIP",
+     "REVERSAL PATTERN",
+    "BIG CANDLE",
+    "MAXIMUM RETAILER ENTRY,TRAP AND SL.",
     "Fibonacci Golden Zone (0.618)"
   ];
 
