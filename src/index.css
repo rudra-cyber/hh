@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+}
+
+@keyframes wave-motion {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Neon Gradient Core Keyframe Animation */
+@keyframes neon-glow-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Ultra advanced neon gradients */
+.glowing-bg-midnight {
+  background: radial-gradient(circle at 10% 20%, rgba(9, 17, 33, 0.98) 0%, rgba(15, 25, 48, 0.99) 44%, rgba(8, 12, 23, 1) 100%),
+              linear-gradient(135deg, #050a14 0%, #001233 25%, #002244 50%, #011627 75%, #050a14 100%);
+  background-size: 300% 300%;
+  animation: neon-glow-flow 16s ease infinite;
+}
+
+.glowing-bg-emerald {
+  background: radial-gradient(circle at 10% 20%, rgba(3, 11, 7, 0.98) 0%, rgba(5, 24, 15, 0.99) 44%, rgba(1, 6, 4, 1) 100%),
+              linear-gradient(135deg, #010403 0%, #031c0e 25%, #083b20 50%, #022013 75%, #010403 100%);
+  background-size: 300% 300%;
+  animation: neon-glow-flow 16s ease infinite;
+}
+
+.glowing-bg-neon {
+  background: radial-gradient(circle at 10% 20%, rgba(8, 2, 22, 0.99) 0%, rgba(18, 5, 45, 0.98) 44%, rgba(5, 1, 15, 1) 100%),
+              linear-gradient(135deg, #070114 0%, #1e053a 25%, #4a0066 50%, #25024c 75%, #070114 100%);
+  background-size: 300% 300%;
+  animation: neon-glow-flow 16s ease infinite;
+}
+
+.glowing-bg-light {
+  background: radial-gradient(circle at 10% 20%, rgba(248, 250, 252, 0.98) 0%, rgba(241, 245, 249, 0.99) 44%, rgba(226, 232, 240, 1) 100%),
+              linear-gradient(135deg, #f8fafc 0%, #f1f5f9 25%, #e2e8f0 50%, #cbd5e1 75%, #f8fafc 100%);
+  background-size: 300% 300%;
+  animation: neon-glow-flow 16s ease infinite;
+}
+
+.ambient-glowing-bg {
+  background: linear-gradient(-45deg, #05070b, #0A0D14, #121620, #09101d);
+  background-size: 300% 300%;
+  animation: wave-motion 18s ease infinite;
+}
+
+.aurora-blur-sphere {
+  filter: blur(100px);
+  opacity: 0.15;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
