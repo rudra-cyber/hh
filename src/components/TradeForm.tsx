@@ -123,17 +123,21 @@ export default function TradeForm({ onSaveTrade, onCancel, strategies, initialDa
   const [customRuleInput, setCustomRuleInput] = useState("");
   const [manualEntryLogicText, setManualEntryLogicText] = useState("");
   const defaultRules = [
+    "BIG CANDLE",
+    "DOM CHART",
+    "MAXIMUM RETAILER ENTRY",
+    "TRAP AND SL",
+    "FOOTPRINT CHART",
+    "HEAVY DELTA FLIP",
+    "REVERSAL PATTERN",
     "Fair Value Gap (FVG)",
     "Structure Shift (MSS/MSB)",
-    "DOM CHART",
+    "Change of Character (ChoCh)",
     "Liquidity Sweep / Grab",
-    "FOOTPRINT CHART",
+    "Discount Zone Alignment",
     "HTF Key Level S/R",
-     "1K DELTA",
-     "HEAVY DELTA FLIP",
-     "REVERSAL PATTERN",
-    "BIG CANDLE",
-    "MAXIMUM RETAILER ENTRY,TRAP AND SL.",
+    "Killzone Session Timing",
+    "EMA/SMA Trend Alignment",
     "Fibonacci Golden Zone (0.618)"
   ];
 
