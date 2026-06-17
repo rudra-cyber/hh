@@ -150,10 +150,10 @@ export default function App() {
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
 
   // 3D Spatial UI & Science-fiction settings
-  const [spatialMode, setSpatialMode] = useState<boolean>(true); // spatial perspective tilt ON by default
-  const [spatialPitch, setSpatialPitch] = useState<number>(6); // X degree
-  const [spatialYaw, setSpatialYaw] = useState<number>(-7); // Y degree
-  const [spatialRoll, setSpatialRoll] = useState<number>(-1); // Z degree
+  const [spatialMode, setSpatialMode] = useState<boolean>(false); // spatial perspective tilt OFF by default
+  const [spatialPitch, setSpatialPitch] = useState<number>(0); // X degree
+  const [spatialYaw, setSpatialYaw] = useState<number>(0); // Y degree
+  const [spatialRoll, setSpatialRoll] = useState<number>(0); // Z degree
   const [spatialDepth, setSpatialDepth] = useState<number>(1400); // perspective focal depth
   const [cursorTiltEnabled, setCursorTiltEnabled] = useState<boolean>(true); // cursor-reactive magnetism ON
   const [cardFlipEnabled, setCardFlipEnabled] = useState<boolean>(true); // card hover 360 flips ON
@@ -565,43 +565,37 @@ export default function App() {
 
   const activeRoll = spatialMode ? spatialRoll : 0;
 
-  // Custom 3D shrink-and-burst tab switching motion variants
+  // Custom sleek scale, slide, and glass blur tab switching motion variants for premium depth layering
   const tab3DVariants = {
     initial: {
       opacity: 0,
-      scale: 1.5,
-      z: 400,
-      rotateY: -65,
-      rotateX: -25,
-      filter: "blur(6px)"
+      scale: 0.95,
+      y: 15,
+      filter: "blur(5px)"
     },
     animate: {
       opacity: 1,
       scale: 1,
-      z: 0,
-      rotateY: 0,
-      rotateX: 0,
+      y: 0,
       filter: "blur(0px)",
       transition: {
         type: "spring",
-        stiffness: 130,
-        damping: 15,
-        mass: 1.15,
-        duration: 0.8
+        stiffness: 140,
+        damping: 18,
+        mass: 1,
+        duration: 0.5
       }
     },
     exit: {
       opacity: 0,
-      scale: 0.22,
-      z: -900,
-      rotateY: 65,
-      rotateX: 25,
-      filter: "blur(8px)",
+      scale: 0.96,
+      y: -10,
+      filter: "blur(7px)",
       transition: {
         type: "spring",
         stiffness: 150,
-        damping: 19,
-        duration: 0.65
+        damping: 20,
+        duration: 0.45
       }
     }
   };
@@ -765,7 +759,7 @@ export default function App() {
       </header>
 
       {/* Primary analytical dashboard or sub-tab selects */}
-      <main className="max-w-7xl w-full mx-auto p-6 space-y-6 flex-1 relative z-10" style={{ perspective: spatialMode ? spatialDepth : undefined }}>
+      <main className="max-w-7xl w-full mx-auto p-6 space-y-6 flex-1 relative z-10">
         
         {/* 🛸 HUD 3D Spatial Configuration Command console block */}
         <AnimatePresence>
@@ -954,24 +948,8 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        {/* 🛸 Primary Spatial 3D viewport canvas wrapper */}
-        <motion.div
-          animate={{
-            rotateX: activePitch,
-            rotateY: activeYaw,
-            rotateZ: activeRoll,
-          }}
-          transition={{
-            type: "spring",
-            stiffness: 90,
-            damping: 18,
-            mass: 1.1
-          }}
-          style={{
-            transformStyle: "preserve-3d",
-          }}
-          className="space-y-6 origin-center"
-        >
+        {/* 🛸 Elegant Workspace Container with high depth layering */}
+        <div className="space-y-6">
           {/* Navigation tabs Row */}
           <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center border-b ${styles.border} pb-4 space-y-4 sm:space-y-0`}>
             
@@ -1623,7 +1601,7 @@ export default function App() {
         )}
         </AnimatePresence>
 
-        </motion.div>
+        </div>
       </main>
 
       {/* FOOTER */}
