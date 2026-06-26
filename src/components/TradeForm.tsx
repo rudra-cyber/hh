@@ -7,7 +7,6 @@ import {
   Mic, MicOff
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import AIAssistant from "./AIAssistant";
 
 interface TradeFormProps {
   onSaveTrade: (trade: Omit<Trade, "id" | "createdAt"> & { id?: string }) => void;
@@ -25,6 +24,7 @@ export default function TradeForm({ onSaveTrade, onCancel, strategies, initialDa
   const [riskReward, setRiskReward] = useState<number | "">("");
   const [mistake, setMistake] = useState("None");
   const [entryReason, setEntryReason] = useState("");
+  const [tradeType, setTradeType] = useState<"REAL" | "BACKTEST">("REAL");
 
   // Voice-to-Text states
   const [isListening, setIsListening] = useState(false);
@@ -263,6 +263,11 @@ export default function TradeForm({ onSaveTrade, onCancel, strategies, initialDa
       if (initialData.stopLossPips) setStopLossPips(initialData.stopLossPips);
       if (initialData.accountBalance) setAccountBalance(initialData.accountBalance);
       setSelectedTags(initialData.tags || []);
+      if (initialData.tradeType) {
+        setTradeType(initialData.tradeType);
+      } else {
+        setTradeType("REAL");
+      }
 
       // Handle custom strategy detection
       const matchStrat = strategies.find(s => s.name === initialData.strategy);
@@ -717,7 +722,8 @@ export default function TradeForm({ onSaveTrade, onCancel, strategies, initialDa
         riskPercent,
         stopLossPips: stopLossPips ? parseFloat(String(stopLossPips)) : undefined,
         accountBalance,
-        tags: selectedTags
+        tags: selectedTags,
+        tradeType
       } as any);
       setSuccessAnimationActive(false);
     }, 3600);
@@ -880,13 +886,6 @@ export default function TradeForm({ onSaveTrade, onCancel, strategies, initialDa
         </button>
       </div>
 
-      {/* AI Assistance autofiller */}
-      {!initialData && (
-        <div className="py-4 border-b border-slate-800 bg-[#0F141C]/50 rounded-xl px-2 my-2">
-          <AIAssistant onExtractionComplete={handleAIAutoFill} />
-        </div>
-      )}
-
       {/* Main Form containing customized widgets */}
       <form onSubmit={handleSubmit} className="space-y-6 pt-5">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -936,6 +935,35 @@ export default function TradeForm({ onSaveTrade, onCancel, strategies, initialDa
                       BEARISH (SHORT)
                     </button>
                   </div>
+                </div>
+              </div>
+
+              {/* Trade Type selection */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Trade Execution Type</label>
+                <div className="grid grid-cols-2 gap-2 bg-[#06090e] p-1 border border-slate-800 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setTradeType("REAL")}
+                    className={`py-2 rounded-lg text-xs font-bold transition-all ${
+                      tradeType === "REAL" 
+                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/30' 
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    REAL (Live Account)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTradeType("BACKTEST")}
+                    className={`py-2 rounded-lg text-xs font-bold transition-all ${
+                      tradeType === "BACKTEST" 
+                        ? 'bg-amber-600 text-white shadow-lg shadow-amber-950/30' 
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    BACKTEST (Simulated)
+                  </button>
                 </div>
               </div>
 
@@ -1082,317 +1110,6 @@ e.g. swept previous day high, shifted structure, 5m FVG entry`}
                   className="w-full text-xs bg-[#06090e] border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl p-3 text-white placeholder-slate-650 font-sans resize-none leading-relaxed"
                 />
                 <p className="text-[9px] text-slate-500 font-mono">Lines written above are automatically compiled into custom checklist badges upon save!</p>
-              </div>
-            </div>
-
-            {/* 🧮 INTELLIGENT POSITION SIZE & LOT CALCULATOR */}
-            <div className="bg-[#0F141C] p-4 rounded-2xl border border-slate-800/60 space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center space-x-1.5">
-                  <Scale className="h-4 w-4 text-indigo-400" />
-                  <span>Position Size & Lot Calculator</span>
-                </h3>
-                <div className="flex bg-[#06090e] border border-slate-800 rounded-lg p-0.5">
-                  <button
-                    type="button"
-                    onClick={() => setSizingMode("forex")}
-                    className={`px-2 py-0.5 text-[10px] font-bold rounded ${sizingMode === "forex" ? "bg-indigo-600 text-white" : "text-slate-500"}`}
-                  >
-                    Forex Lots
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSizingMode("crypto")}
-                    className={`px-2 py-0.5 text-[10px] font-bold rounded ${sizingMode === "crypto" ? "bg-indigo-600 text-white" : "text-slate-500"}`}
-                  >
-                    Crypto/Spot
-                  </button>
-                </div>
-              </div>
-
-              {/* Calculator Inputs */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                {/* Account Balance */}
-                <div>
-                  <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Account Balance ($)</label>
-                  <input
-                    type="number"
-                    value={accountBalance}
-                    onChange={(e) => setAccountBalance(parseFloat(e.target.value) || 0)}
-                    className="w-full text-xs font-bold font-mono bg-[#06090e] border border-slate-800 rounded-xl p-2.5 text-white"
-                  />
-                </div>
-
-                {/* Customized Risk Percent */}
-                <div>
-                  <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">
-                    Risk Percentage (%)
-                  </label>
-                  <div className="flex items-center space-x-1.5 bg-[#06090e] border border-slate-800 rounded-xl px-2 py-1">
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={riskPercent}
-                      onChange={(e) => setRiskPercent(parseFloat(e.target.value) || 0)}
-                      className="w-full bg-transparent text-xs font-bold font-mono focus:outline-none text-white border-none py-1.5 text-center"
-                    />
-                    <span className="text-[10px] font-bold text-slate-500">%</span>
-                  </div>
-                </div>
-
-                {/* Customized Risk in Dollar Amount */}
-                <div>
-                  <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">
-                    Risk per Trade ($ Dollar)
-                  </label>
-                  <div className="flex items-center space-x-1.5 bg-[#06090e] border border-slate-800 rounded-xl px-2 py-1">
-                    <span className="text-[10px] font-bold text-slate-500">$</span>
-                    <input
-                      type="number"
-                      step="any"
-                      placeholder="e.g. 150"
-                      value={parseFloat((accountBalance * riskPercent / 100).toFixed(2)) || ""}
-                      onChange={(e) => {
-                        const dollarVal = parseFloat(e.target.value) || 0;
-                        if (accountBalance > 0) {
-                          const pct = parseFloat(((dollarVal / accountBalance) * 105).toFixed(2));
-                          // Actually let's use the precise math: pct = (dollarVal / accountBalance) * 100
-                          const precisePct = parseFloat(((dollarVal / accountBalance) * 100).toFixed(2));
-                          setRiskPercent(precisePct);
-                        }
-                      }}
-                      className="w-full bg-transparent text-xs font-bold font-mono focus:outline-none text-white border-none py-1.5 text-center"
-                    />
-                  </div>
-                </div>
-
-                {/* Customized Leverage */}
-                <div>
-                  <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">
-                    Leverage (Multiplier)
-                  </label>
-                  <div className="flex items-center space-x-1.5 bg-[#06090e] border border-slate-800 rounded-xl px-2 py-1">
-                    <input
-                      type="number"
-                      value={leverage}
-                      onChange={(e) => setLeverage(parseInt(e.target.value) || 1)}
-                      className="w-full bg-transparent text-xs font-bold font-mono focus:outline-none text-white border-none py-1.5 text-center"
-                    />
-                    <span className="text-[10px] font-bold text-slate-500">x</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Slider customization for Risk and Leverage */}
-              <div className="grid grid-cols-2 gap-4 pt-1">
-                <div>
-                  <div className="flex justify-between text-[9px] text-slate-500 font-bold">
-                    <span>Risk: {riskPercent}%</span>
-                    <span>Max 5%</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0.1"
-                    max="5.0"
-                    step="0.1"
-                    value={riskPercent}
-                    onChange={(e) => setRiskPercent(parseFloat(e.target.value))}
-                    className="w-full h-1 bg-[#06090e] rounded-lg appearance-none cursor-pointer accent-indigo-500"
-                  />
-                </div>
-                <div>
-                  <div className="flex justify-between text-[9px] text-slate-500 font-bold">
-                    <span>Leverage: {leverage}x</span>
-                    <span>Max 200x</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="1"
-                    max="200"
-                    step="1"
-                    value={leverage}
-                    onChange={(e) => setLeverage(parseInt(e.target.value))}
-                    className="w-full h-1 bg-[#06090e] rounded-lg appearance-none cursor-pointer accent-indigo-500"
-                  />
-                </div>
-              </div>
-
-              {/* Price level inputs for math calculations */}
-              <div className="grid grid-cols-2 gap-3 pt-1">
-                <div>
-                  <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Entry Price</label>
-                  <input
-                    type="number"
-                    step="any"
-                    placeholder="e.g. 1.12000"
-                    value={entryPrice}
-                    onChange={(e) => setEntryPrice(e.target.value !== "" ? parseFloat(e.target.value) : "")}
-                    className="w-full text-xs font-bold font-mono bg-[#06090e] border border-slate-800 rounded-xl p-2.5 text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Stop Loss Price</label>
-                  <input
-                    type="number"
-                    step="any"
-                    placeholder="e.g. 1.11750"
-                    value={stopLossPrice}
-                    onChange={(e) => setStopLossPrice(e.target.value !== "" ? parseFloat(e.target.value) : "")}
-                    className="w-full text-xs font-bold font-mono bg-[#06090e] border border-slate-800 rounded-xl p-2.5 text-white"
-                  />
-                </div>
-              </div>
-
-              {/* Direct Stop Loss state directly editable if no prices entered */}
-              <div>
-                <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">
-                  Manual Stop Loss distance (Pips / Points)
-                </label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="number"
-                    value={stopLossPips}
-                    onChange={(e) => setStopLossPips(parseFloat(e.target.value) || 0)}
-                    className="flex-1 text-xs font-bold font-mono bg-[#06090e] border border-slate-800 rounded-xl p-2.5 text-white"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (entryPrice && stopLossPrice) {
-                        const calculatedDist = Math.abs(parseFloat(String(entryPrice)) - parseFloat(String(stopLossPrice)));
-                        if (sizingMode === "forex") {
-                          const pipsValue = parseFloat((calculatedDist * 10000).toFixed(1));
-                          setStopLossPips(pipsValue);
-                        } else {
-                          setStopLossPips(parseFloat(calculatedDist.toFixed(2)));
-                        }
-                      } else {
-                        alert("Please specify reasonable Entry and Stop Loss prices first!");
-                      }
-                    }}
-                    className="bg-[#06090e] hover:border-slate-700 border border-slate-800 text-slate-300 px-3 py-2.5 rounded-xl text-xs font-bold transition flex items-center space-x-1"
-                  >
-                    <span>🧮 Compute from Prices</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Calculate trigger and display results */}
-              <div className="bg-[#06090e] p-3 rounded-xl border border-slate-800 font-mono text-[11px] text-slate-300 space-y-2">
-                <div className="flex justify-between border-b border-slate-800/60 pb-1.5 font-sans font-semibold">
-                  <span className="text-slate-500">Risk Capital:</span>
-                  <span className="text-red-400 font-bold">${(accountBalance * riskPercent / 100).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between border-b border-slate-800/60 pb-1.5 font-sans font-semibold">
-                  <span className="text-slate-500">Stop Distance:</span>
-                  <span className="text-white font-bold">{stopLossPips} {sizingMode === "forex" ? "Pips" : "Units/Points"}</span>
-                </div>
-
-                {/* Instant Calculation output */}
-                <div className="flex justify-between items-center bg-indigo-500/10 border border-indigo-500/25 rounded-lg p-2 font-sans">
-                  <div>
-                    <span className="text-xs text-indigo-400 font-bold block">Recommended Lots/Size:</span>
-                    <span className="text-lg font-black font-mono text-white">
-                      {(() => {
-                        let calcLots = 0;
-                        const riskVal = (accountBalance * riskPercent / 100);
-                        if (stopLossPips > 0) {
-                          if (sizingMode === "forex") {
-                            calcLots = riskVal / (stopLossPips * 10);
-                          } else {
-                            calcLots = riskVal / stopLossPips;
-                          }
-                        }
-                        const finalL = calcLots > 0 ? parseFloat(calcLots.toFixed(sizingMode === "forex" ? 2 : 4)) : 0;
-                        return finalL;
-                      })()}
-                    </span>
-                    <span className="text-[10px] text-slate-400 block mt-0.5">
-                      {sizingMode === "forex" ? "Standard Forex Lots" : "Crypto token/Shares units"}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      let calcLots = 0;
-                      const riskVal = (accountBalance * riskPercent / 100);
-                      if (stopLossPips > 0) {
-                        if (sizingMode === "forex") {
-                          calcLots = riskVal / (stopLossPips * 10);
-                        } else {
-                          calcLots = riskVal / stopLossPips;
-                        }
-                      }
-                      const finalL = calcLots > 0 ? parseFloat(calcLots.toFixed(sizingMode === "forex" ? 2 : 4)) : 0;
-                      setLotSize(finalL);
-                    }}
-                    className="bg-indigo-500 hover:bg-indigo-600 text-white font-extrabold text-[10px] px-3 py-2 rounded-lg transition"
-                  >
-                    👉 Copy to Ticket
-                  </button>
-                </div>
-              </div>
-
-              {/* ✨ AI Sizing generator */}
-              <div className="pt-1.5">
-                <button
-                  type="button"
-                  disabled={aiCalculating}
-                  onClick={async () => {
-                    setAiCalculating(true);
-                    setAiCalcResponse(null);
-                    try {
-                      const res = await fetch("/api/gemini/calculate-position", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          pair: pair || "BTCUSD",
-                          direction,
-                          accountBalance,
-                          riskPercent,
-                          leverage,
-                          entryReason: entryReason || "No context yet"
-                        })
-                      });
-                      const data = await res.json();
-                      if (data.error) {
-                        alert("AI Sizing Alert: " + data.error);
-                      } else {
-                        setAiCalcResponse(data);
-                        if (data.entryPrice) setEntryPrice(data.entryPrice);
-                        if (data.stopLossPrice) setStopLossPrice(data.stopLossPrice);
-                        if (data.stopLossPips) setStopLossPips(data.stopLossPips);
-                        if (data.lotSize) setLotSize(data.lotSize);
-                      }
-                    } catch (err: any) {
-                      console.error(err);
-                      alert("Unable to fetch AI Position sizing.");
-                    } finally {
-                      setAiCalculating(false);
-                    }
-                  }}
-                  className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white p-3 rounded-xl font-extrabold text-xs flex items-center justify-center space-x-1.5 shadow-lg shadow-purple-950/40 transition-all disabled:opacity-50"
-                >
-                  <Sparkles className="h-4 w-4 text-yellow-300" />
-                  <span>{aiCalculating ? "🤖 AI Sizing Estimator Computing..." : "✨ Ask AI to Estimate Entry, SL & Lots"}</span>
-                </button>
-
-                {aiCalcResponse && (
-                  <div className="mt-3 bg-purple-950/15 border border-purple-500/20 rounded-xl p-3 text-xs space-y-2">
-                    <p className="text-purple-400 font-extrabold flex items-center space-x-1">
-                      <span>🤖 Artificial Risk Assessment:</span>
-                    </p>
-                    <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-slate-300 bg-black/40 p-2 rounded-lg border border-slate-900">
-                      <div><span className="text-slate-500">AI Est Entry:</span> <span className="text-emerald-400 font-black">{aiCalcResponse.entryPrice}</span></div>
-                      <div><span className="text-slate-500">AI Est Stop:</span> <span className="text-red-400 font-black">{aiCalcResponse.stopLossPrice}</span></div>
-                      <div><span className="text-slate-500">AI Est Lot Size:</span> <span className="text-indigo-400 font-black">{aiCalcResponse.lotSize}</span></div>
-                      <div><span className="text-slate-500">Needed Margin:</span> <span className="text-yellow-400 font-black">${aiCalcResponse.marginUsd?.toFixed(2)}</span></div>
-                    </div>
-                    <div className="text-[10px] bg-black/10 rounded p-1.5 text-slate-405 leading-normal italic whitespace-pre-line border-l-2 border-purple-500/50">
-                      {aiCalcResponse.commentary}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 
