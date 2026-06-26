@@ -28,6 +28,7 @@ export interface Trade {
   stopLossPips?: number;   // Stop loss in pips/points
   accountBalance?: number; // Account balance at entry
   tags?: string[];         // e.g. ["Breakout", "Reversal", "Trend-following"]
+  tradeType?: "REAL" | "BACKTEST";
 }
 
 export interface Strategy {
