@@ -10,7 +10,7 @@ import {
   Database, RefreshCw, BarChart3, BookOpen, Layers, 
   Download, LogIn, LogOut, Check, AlertTriangle, Play,
   TrendingUp, Compass, FolderSync, Settings, Sparkles, Image as ImageIcon,
-  Activity, ChevronDown, ChevronUp
+  Activity, ChevronDown, ChevronUp, Flame
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import AnalyticsPanel from "./components/AnalyticsPanel";
@@ -22,6 +22,7 @@ import Tooltip from "./components/Tooltip";
 import Glowing3DNumber from "./components/Glowing3DNumber";
 import SciFi3DCard from "./components/SciFi3DCard";
 import ParallaxWaveBackground from "./components/ParallaxWaveBackground";
+import CalendarFilter from "./components/CalendarFilter";
 
 const themeStyles = {
   midnight: {
@@ -126,6 +127,7 @@ export default function App() {
 
   // Core database states
   const [trades, setTrades] = useState<Trade[]>([]);
+  const [journalType, setJournalType] = useState<"REAL" | "BACKTEST">("REAL");
   const [strategies, setStrategies] = useState<Strategy[]>(DEFAULT_STRATEGIES);
 
   // Filter and search variables
@@ -133,6 +135,7 @@ export default function App() {
   const [statusFilter, setStatusFilter] = useState<"ALL" | "WINS" | "LOSSES">("ALL");
   const [strategyFilter, setStrategyFilter] = useState("ALL_STRATEGIES");
   const [tagFilter, setTagFilter] = useState("ALL_TAGS");
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   // Form Modals
   const [showTradeForm, setShowTradeForm] = useState(false);
@@ -521,14 +524,37 @@ export default function App() {
     alert("Ledger completely reset! All metrics and trades are now zero.");
   };
 
+  // Active trades based on journalType (Real vs Backtest)
+  const activeTrades = React.useMemo(() => {
+    return trades.filter((t) => {
+      const type = t.tradeType || "REAL";
+      return type === journalType;
+    });
+  }, [trades, journalType]);
+
   // Compute stats
   const performanceStats = React.useMemo(() => {
-    return calculatePerformanceStats(trades);
-  }, [trades]);
+    return calculatePerformanceStats(activeTrades);
+  }, [activeTrades]);
+
+  // Compute current win streak from consecutive winning trades starting backwards from chronologically sorted trades
+  const currentWinStreak = React.useMemo(() => {
+    if (!activeTrades || activeTrades.length === 0) return 0;
+    const sorted = [...activeTrades].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+    let streak = 0;
+    for (let i = sorted.length - 1; i >= 0; i--) {
+      if (sorted[i].profit > 0) {
+        streak++;
+      } else if (sorted[i].profit < 0) {
+        break;
+      }
+    }
+    return streak;
+  }, [activeTrades]);
 
   // Apply filters on the ledger list
   const filteredTrades = React.useMemo(() => {
-    return trades.filter((t) => {
+    return activeTrades.filter((t) => {
       // 1. Text Search query (Filter of pair, strategy, or reasons)
       const matchesSearch = 
         t.pair.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -550,9 +576,16 @@ export default function App() {
         tagFilter === "ALL_TAGS" ? true :
         t.tags && t.tags.includes(tagFilter);
 
-      return matchesSearch && matchesWinLoss && matchesStrategy && matchesTag;
+      // 5. Calendar date filter
+      let matchesDate = true;
+      if (selectedDate) {
+        const dStr = t.date || (t.createdAt?.split("T")[0]) || (t.time?.includes("T") ? t.time.split("T")[0] : "");
+        matchesDate = dStr === selectedDate;
+      }
+
+      return matchesSearch && matchesWinLoss && matchesStrategy && matchesTag && matchesDate;
     });
-  }, [trades, searchQuery, statusFilter, strategyFilter, tagFilter]);
+  }, [activeTrades, searchQuery, statusFilter, strategyFilter, tagFilter, selectedDate]);
 
   // Compute active spatial pitch & yaw combining static slider values with real-time cursor offsets
   const activePitch = spatialMode 
@@ -631,13 +664,47 @@ export default function App() {
               <span className="text-[10px] font-mono tracking-wider bg-gradient-to-r from-pink-500 to-purple-500 text-white font-black px-2.5 py-0.5 rounded uppercase shadow-sm shadow-pink-500/30">
                 Made by Topu
               </span>
+              <div className={`text-[10px] font-mono tracking-wider px-2.5 py-0.5 rounded-lg flex items-center font-bold ${
+                currentWinStreak > 0 
+                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse shadow-[0_0_12px_rgba(245,158,11,0.25)]" 
+                  : "bg-slate-500/10 text-slate-400 border border-slate-500/15"
+              }`}>
+                <Flame className={`h-3.5 w-3.5 mr-1 ${currentWinStreak > 0 ? "text-amber-400 fill-amber-400" : "text-slate-500"}`} />
+                <span>Streak: {currentWinStreak} {currentWinStreak === 1 ? "win" : "wins"}</span>
+              </div>
             </div>
             <p className="text-[10px] text-slate-500">Isolate metrics. Build discipline. Elevate edge.</p>
           </div>
         </div>
 
         {/* Sync, PDF Export and Clear state */}
-        <div className="flex items-center space-x-2 flex-wrap">
+        <div className="flex items-center space-x-2 flex-wrap gap-y-2">
+          
+          {/* Real vs Backtest Switcher */}
+          <div className="flex bg-[#0b0e14] border border-slate-800 rounded-xl p-1 items-center space-x-1 shadow-inner shadow-black">
+            <button
+              onClick={() => setJournalType("REAL")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition duration-150 flex items-center space-x-1.5 cursor-pointer ${
+                journalType === "REAL"
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/30"
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${journalType === "REAL" ? "bg-white" : "bg-blue-500 animate-pulse"}`} />
+              <span>Real Trades</span>
+            </button>
+            <button
+              onClick={() => setJournalType("BACKTEST")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition duration-150 flex items-center space-x-1.5 cursor-pointer ${
+                journalType === "BACKTEST"
+                  ? "bg-amber-600 text-white shadow-md shadow-amber-550/20"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/30"
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${journalType === "BACKTEST" ? "bg-white" : "bg-amber-500 animate-pulse"}`} />
+              <span>Backtests</span>
+            </button>
+          </div>
           
           {/* Cloud Sync Status Pill */}
           <div className={`flex items-center ${styles.pillBg} border border-slate-800 rounded-xl px-3 py-2 text-xs ${styles.textMuted} space-x-2`}>
@@ -662,7 +729,7 @@ export default function App() {
           {/* PDF Report Export Component */}
           <Tooltip content="Print/Export Custom PDF Analytical Report">
             <div>
-              <ExportPDF trades={trades} stats={performanceStats} strategies={strategies} />
+              <ExportPDF trades={activeTrades} stats={performanceStats} strategies={strategies} />
             </div>
           </Tooltip>
 
@@ -1147,7 +1214,7 @@ export default function App() {
                     className={`appearance-none ${styles.inputBg} border ${styles.border} text-xs py-2 px-4 pr-8 rounded-xl font-semibold text-rose-450 focus:border-rose-500 focus:outline-none cursor-pointer`}
                   >
                     <option value="ALL_TAGS" className="text-slate-400">🏷️ All Trade Tags</option>
-                    {Array.from(new Set(trades.flatMap(t => t.tags || []).filter(Boolean))).map((tTag) => (
+                    {Array.from(new Set(activeTrades.flatMap(t => t.tags || []).filter(Boolean))).map((tTag) => (
                       <option key={tTag} value={tTag} className="text-white bg-slate-950">
                         🏷️ {tTag}
                       </option>
@@ -1159,22 +1226,34 @@ export default function App() {
 
             </div>
 
-             {/* Trading Tickets list display */}
-            <div className="grid grid-cols-1 gap-4">
-              <AnimatePresence mode="popLayout">
+             {/* 2-Column Responsive Layout: Calendar Sidebar & Trading Tickets List */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              
+              {/* Calendar Navigation Sidebar Component */}
+              <div className="lg:col-span-4 lg:sticky lg:top-24">
+                <CalendarFilter 
+                  trades={activeTrades}
+                  selectedDate={selectedDate}
+                  onSelectDate={setSelectedDate}
+                  activeTheme={activeTheme}
+                />
+              </div>
+
+              {/* Trading Tickets list display */}
+              <div className="lg:col-span-8 space-y-4">
+                <AnimatePresence mode="popLayout">
                 {filteredTrades.map((t, index) => {
                   const isExpanded = expandedTradeIds.includes(t.id);
                   return (
                     <motion.div
                       key={t.id}
-                      initial={{ opacity: 0, x: 200 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: false, margin: "-20px" }}
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
                       transition={{
                         type: "spring",
-                        stiffness: 120,
-                        damping: 17,
-                        delay: Math.min((index % 6) * 0.08, 0.45)
+                        stiffness: 100,
+                        damping: 15,
+                        delay: Math.min((index % 8) * 0.06, 0.4)
                       }}
                       style={{ perspective: 1200, transformStyle: "preserve-3d" }}
                       className="w-full"
@@ -1544,6 +1623,7 @@ export default function App() {
                   <p className="text-xs text-slate-500 mt-1">Try resetting the filters or log a fresh trade to populate the ledger.</p>
                 </div>
               )}
+              </div>
             </div>
 
           </motion.div>
@@ -1559,7 +1639,7 @@ export default function App() {
             exit="exit"
             style={{ transformStyle: "preserve-3d" }}
           >
-            <AnalyticsPanel trades={trades} stats={performanceStats} />
+            <AnalyticsPanel trades={activeTrades} stats={performanceStats} />
           </motion.div>
         )}
 
@@ -1577,7 +1657,7 @@ export default function App() {
               strategies={strategies} 
               onAddStrategy={handleAddStrategy} 
               onDeleteStrategy={handleDeleteStrategy}
-              trades={trades}
+              trades={activeTrades}
             />
           </motion.div>
         )}
@@ -1593,7 +1673,7 @@ export default function App() {
             style={{ transformStyle: "preserve-3d" }}
           >
             <MonthlyReports 
-              trades={trades} 
+              trades={activeTrades} 
               styles={styles} 
               activeTheme={activeTheme}
             />
