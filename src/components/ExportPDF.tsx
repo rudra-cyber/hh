@@ -18,6 +18,16 @@ type ReportThemeMode = "light" | "grid" | "dark" | "glass" | "vintage" | "cyber"
 export default function ExportPDF({ trades, stats, strategies }: ExportPDFProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [reportTitle, setReportTitle] = useState("EdgeJournal Terminal Performance Audit");
+
+  React.useEffect(() => {
+    const isAllBacktest = trades.length > 0 && trades.every(t => t.tradeType === "BACKTEST");
+    if (isAllBacktest) {
+      setReportTitle("EdgeJournal Backtest Performance Audit");
+    } else {
+      setReportTitle("EdgeJournal Terminal Performance Audit");
+    }
+  }, [trades]);
+
   const [layoutPreset, setLayoutPreset] = useState<LayoutPreset>("slate");
   const [reportThemeMode, setReportThemeMode] = useState<ReportThemeMode>("dark");
   const [includeCharts, setIncludeCharts] = useState(true);
