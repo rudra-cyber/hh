@@ -368,6 +368,8 @@ export default function App() {
       riskPercent: formData.riskPercent,
       stopLossPips: formData.stopLossPips,
       accountBalance: formData.accountBalance,
+      tradeType: formData.tradeType,
+      journalNotes: formData.journalNotes,
       createdAt: timestamp
     };
 
@@ -1495,6 +1497,19 @@ export default function App() {
                                 <p className={`text-xs ${activeTheme === 'light' ? 'text-slate-700' : 'text-slate-300'} leading-relaxed font-sans whitespace-pre-wrap`}>
                                   {t.entryReason}
                                 </p>
+                              </div>
+                            )}
+
+                            {/* Psychology & Detailed Journal Reflections */}
+                            {t.journalNotes && (
+                              <div className={`bg-indigo-500/5 border ${activeTheme === 'light' ? 'border-indigo-400/20' : 'border-indigo-500/20'} p-3.5 rounded-xl`}>
+                                <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-400 block mb-2">
+                                  🧠 Psychology & Detailed Reflections
+                                </span>
+                                <div 
+                                  className={`text-xs ${activeTheme === 'light' ? 'text-slate-700' : 'text-slate-300'} leading-relaxed font-sans prose prose-sm max-w-none break-words`}
+                                  dangerouslySetInnerHTML={{ __html: t.journalNotes }}
+                                />
                               </div>
                             )}
 
